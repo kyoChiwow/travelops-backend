@@ -37,5 +37,5 @@ export interface IUser {
     role : Role;
     auths : IAuthProvider[];
     bookings: Types.ObjectId[];
-    guidess ?: Types.ObjectId[];
+    guides ?: Types.ObjectId[];
 }
