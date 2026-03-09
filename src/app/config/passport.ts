@@ -16,11 +16,16 @@ passport.use(
   new LocalStrategy({
     usernameField: "email",
     passwordField: "password"
-  }, async (email: string, password: string, done: any) => {
+  }, async (email: string, password: string, done) => {
     try {
       const isUserExist = await User.findOne({ email });
       if (!isUserExist) {
         return done(null, false, { message: "User does not exist!"})
+      }
+
+      const isGoogleAuthenticated = isUserExist.auths.some(providerObjects => providerObjects.provider === "google")
+      if (isGoogleAuthenticated && !isUserExist.password) {
+        return done(null, false, { message: "You have authenticated through google, If you want to login with credentials, then login with gmail and add your password, after that logout and login again!"})
       }
 
       const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string)

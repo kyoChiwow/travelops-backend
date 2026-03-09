@@ -1,28 +1,46 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
+import passport from "passport";
+import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/appError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { AuthServices } from "./auth.service";
 import { setAuthCookie } from "../../utils/setCookie";
 import { createUserTokens } from "../../utils/userTokens";
-import { envVars } from "../../config/env";
-import { JwtPayload } from "jsonwebtoken";
+import { AuthServices } from "./auth.service";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const loginInfo = await AuthServices.crendentialsLogin(req.body);
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        return next(new AppError(httpStatus.UNAUTHORIZED, err));
+      }
 
-    setAuthCookie(res, loginInfo);
+      if (!user) {
+        return next(new AppError(httpStatus.UNAUTHORIZED, info.message));
+      }
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "User login succesful!",
-      data: loginInfo,
-    });
+      const userTokens = await createUserTokens(user);
+
+      const { password: pass, ...rest } = user.toObject();
+
+      setAuthCookie(res, userTokens);
+
+      sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User login succesful!",
+        data: {
+          accessToken: userTokens.accessToken,
+          refreshToken: userTokens.refreshToken,
+          user: rest
+        },
+      });
+    })(req, res, next); // Manually trigger here because express wont call it again as it is in a callback function
   },
 );
 
@@ -48,8 +66,16 @@ const getNewAccessToken = catchAsync(
 
 const logOut = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    res.clearCookie("accessToken", { httpOnly: true, secure: false, sameSite: "lax" });
-    res.clearCookie("refreshToken", { httpOnly: true, secure: false, sameSite: "lax" });
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
 
     sendResponse(res, {
       success: true,
@@ -66,7 +92,11 @@ const resetPassword = catchAsync(
     const oldPassword = req.body.oldPassword;
     const decodedToken = req.user;
 
-    await AuthServices.resetPassword(oldPassword, newPassword, decodedToken as JwtPayload);
+    await AuthServices.resetPassword(
+      oldPassword,
+      newPassword,
+      decodedToken as JwtPayload,
+    );
 
     sendResponse(res, {
       success: true,
@@ -77,26 +107,28 @@ const resetPassword = catchAsync(
   },
 );
 
-const googleCallbackController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  let redirectTo = req.query.state ? req.query.state as string : "";
-  if (redirectTo.startsWith("/")) {
-    redirectTo = redirectTo.slice(1)
-  }
+const googleCallbackController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let redirectTo = req.query.state ? (req.query.state as string) : "";
+    if (redirectTo.startsWith("/")) {
+      redirectTo = redirectTo.slice(1);
+    }
 
-  const user = req.user;
+    const user = req.user;
 
-  console.log("user", user);
+    console.log("user", user);
 
-  if(!user) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User not found!")
-  }
+    if (!user) {
+      throw new AppError(httpStatus.BAD_REQUEST, "User not found!");
+    }
 
-  const tokenInfo = createUserTokens(user);
+    const tokenInfo = createUserTokens(user);
 
-  setAuthCookie(res, tokenInfo)
+    setAuthCookie(res, tokenInfo);
 
-  res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
-});
+    res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
+  },
+);
 
 export const AuthControllers = {
   credentialsLogin,
