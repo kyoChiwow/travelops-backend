@@ -6,6 +6,9 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { setAuthCookie } from "../../utils/setCookie";
+import { createUserTokens } from "../../utils/userTokens";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -62,7 +65,7 @@ const resetPassword = catchAsync(
     const oldPassword = req.body.oldPassword;
     const decodedToken = req.user;
 
-    await AuthServices.resetPassword(oldPassword, newPassword, decodedToken);
+    await AuthServices.resetPassword(oldPassword, newPassword, decodedToken as JwtPayload);
 
     sendResponse(res, {
       success: true,
@@ -73,9 +76,26 @@ const resetPassword = catchAsync(
   },
 );
 
+const googleCallbackController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user;
+
+  console.log("user", user);
+
+  if(!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User not found!")
+  }
+
+  const tokenInfo = createUserTokens(user);
+
+  setAuthCookie(res, tokenInfo)
+
+  res.redirect(`${envVars.FRONTEND_URL}/booking`);
+});
+
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
   logOut,
   resetPassword,
+  googleCallbackController,
 };

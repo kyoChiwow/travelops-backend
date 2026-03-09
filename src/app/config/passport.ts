@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import passport from "passport";
 import {
@@ -42,15 +43,29 @@ passport.use(
 
         return done(null, user);
       } catch (error) {
-        console.log(error, "Google strategy error!")
+        console.log(error, "Google strategy error!");
         return done(error);
       }
     },
   ),
 );
 
+passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
+  done(null, user._id);
+});
+
+passport.deserializeUser(async (id: string, done: any) => {
+  try {
+    const user = User.findById(id);
+    done(null, user);
+  } catch (error) {
+    console.log(error);
+    done(error);
+  }
+});
+
 // Flow of google authentication
-// frontend (localhost or production) --> backend (localhost or production) --> passport --> Google OAuth consent screen --> Gmail login --> Successful --> backend callback url (localhost or production) --> Db store --> token
+// frontend (localhost:5173/login?redirect=/booking or production) --> backend (localhost:5000/api/v1/auth/google?redirect=/booking or production) --> passport --> Google OAuth consent screen --> Gmail login --> Successful --> backend callback url (localhost or production) --> Db store --> token
 
 // Bridge === Google --> User check if exist or not --> User db store --> token
 
