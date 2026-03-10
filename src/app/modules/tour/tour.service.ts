@@ -2,6 +2,7 @@ import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/appError";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
+import { tourSearchableFields } from "./tour.constant";
 
 const createTourTypeService = async (payload: Partial<ITourType>) => {
   const existingTourType = await TourType.findOne({ name: payload.name });
@@ -59,42 +60,39 @@ const deleteTourTypeService = async (id: string) => {
 };
 
 const createTourService = async (payload: Partial<ITour>) => {
-  console.log(payload)
   const existingTour = await Tour.findOne({ slug: payload.slug });
 
   if (existingTour) {
     throw new AppError(httpStatus.BAD_REQUEST, "Tour already exists!");
   }
 
-  const baseSlug = payload.title?.toLocaleLowerCase().split(" ").join("-");
-      let slug = `${baseSlug}-tour`;
-  
-      // Extra safety check
-      let counter = 0
-      while(await Tour.exists({ slug })) {
-          slug = `${slug}-${counter++}`
-      }
-      // Extra safety check
-  
-      payload.slug = slug
-
   const createTour = await Tour.create(payload);
 
   return createTour;
-}
+};
 
-const getToursService = async () => {
-  const tours = await Tour.find({});
+const getToursService = async (query: Record<string, string>) => {
+  const filter = query;
+  const searchTerm = query.searchTerm || "";
 
+  delete filter["searchTerm"];
+
+  const searchQuery = {
+    $or: tourSearchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    })),
+  };
+
+  const tours = await Tour.find(searchQuery).find(filter);
   const allTours = await Tour.countDocuments();
 
   return {
     data: tours,
     meta: {
-      total: allTours
-    }
-  }
-}
+      total: allTours,
+    },
+  };
+};
 
 const updateTourService = async (id: string, payload: Partial<ITour>) => {
   const isTourExist = await Tour.findById(id);
@@ -103,27 +101,13 @@ const updateTourService = async (id: string, payload: Partial<ITour>) => {
     throw new AppError(httpStatus.NOT_FOUND, "Tour does not exist!");
   }
 
-  if (payload.title) {
-    const baseSlug = payload.title?.toLocaleLowerCase().split(" ").join("-");
-      let slug = `${baseSlug}-tour`;
-  
-      // Extra safety check
-      let counter = 0
-      while(await Tour.exists({ slug })) {
-          slug = `${slug}-${counter++}`
-      }
-      // Extra safety check
-  
-      payload.slug = slug
-  }
-
   const newUpdatedTour = await Tour.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
   });
 
   return newUpdatedTour;
-}
+};
 
 const deleteTourService = async (id: string) => {
   const isTourExist = await Tour.findById(id);
@@ -135,7 +119,7 @@ const deleteTourService = async (id: string) => {
   const result = await Tour.findByIdAndDelete(id);
 
   return result;
-}
+};
 
 export const TourServices = {
   createTourTypeService,
@@ -145,5 +129,5 @@ export const TourServices = {
   createTourService,
   getToursService,
   updateTourService,
-  deleteTourService
+  deleteTourService,
 };

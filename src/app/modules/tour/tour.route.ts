@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { updateDivisionZodSchema } from "../division/division.validation";
 import { Role } from "../user/user.interface";
 import { TourControllers } from "./tour.controller";
 import {
   createTourTypeZodSchema,
   createTourZodSchema,
+  updateTourZodSchema,
 } from "./tour.validation";
 
 const router = Router();
@@ -18,18 +18,14 @@ router.post(
   validateRequest(createTourTypeZodSchema),
   TourControllers.createTourType,
 );
-router.get(
-  "/all-tour-types",
-  TourControllers.getAllTourTypes,
-);
+router.get("/all-tour-types", TourControllers.getAllTourTypes);
 router.patch(
-  "/:id",
+  "/tour-type/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  validateRequest(updateDivisionZodSchema),
   TourControllers.updateTourType,
 );
 router.delete(
-  "/:id",
+  "/tour-type/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   TourControllers.deleteTourType,
 );
@@ -39,19 +35,16 @@ router.delete(
 router.post(
   "/create",
   validateRequest(createTourZodSchema),
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN,),
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   TourControllers.createTour,
 );
 
-router.get(
-  "/all-tours",
-  TourControllers.getTours,
-);
+router.get("/", TourControllers.getTours);
 
 router.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  validateRequest(updateDivisionZodSchema),
+  validateRequest(updateTourZodSchema),
   TourControllers.updateTour,
 );
 

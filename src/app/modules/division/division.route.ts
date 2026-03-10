@@ -14,7 +14,7 @@ router.post(
   DivisonControllers.createDivision,
 );
 
-router.get("/all-divisions", DivisonControllers.getDivisions);
+router.get("/", DivisonControllers.getDivisions);
 router.patch(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

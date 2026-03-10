@@ -3,28 +3,16 @@ import AppError from "../../errorHelpers/appError";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
-const createDivisionService = async (payload: Partial<IDivision>) => {
-  const existingDivision = await Division.findOne({ name: payload.name });
+const createDivisionService = async (payload: IDivision) => {
 
-  if (existingDivision) {
-    throw new AppError(httpStatus.NOT_ACCEPTABLE, "Division already exists!");
-  }
+    const existingDivision = await Division.findOne({ name: payload.name });
+    if (existingDivision) {
+        throw new Error("A division with this name already exists.");
+    }
 
-  const baseSlug = payload.name?.toLocaleLowerCase().split(" ").join("-");
-  let slug = `${baseSlug}-division`;
+    const division = await Division.create(payload);
 
-  // Extra safety check
-  let counter = 0;
-  while (await Division.exists({ slug })) {
-    slug = `${slug}-${counter++}`;
-  }
-  // Extra safety check
-
-  payload.slug = slug;
-
-  const division = await Division.create(payload);
-
-  return division;
+    return division
 };
 
 const getDivisionsService = async () => {
@@ -57,20 +45,6 @@ const updateDivisionService = async (
 
   if (duplicateDivision) {
     throw new AppError(httpStatus.NOT_ACCEPTABLE, "Division already exists!");
-  }
-
-  if (payload.name) {
-    const baseSlug = payload.name?.toLocaleLowerCase().split(" ").join("-");
-    let slug = `${baseSlug}-division`;
-
-    // Extra safety check
-    let counter = 0;
-    while (await Division.exists({ slug })) {
-      slug = `${slug}-${counter++}`;
-    }
-    // Extra safety check
-
-    payload.slug = slug;
   }
 
   const newUpdatedDivision = await Division.findByIdAndUpdate(id, payload, {
