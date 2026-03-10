@@ -3,6 +3,7 @@ import AppError from "../../errorHelpers/appError";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 import { tourSearchableFields } from "./tour.constant";
+import { excludeField } from "../../constants";
 
 const createTourTypeService = async (payload: Partial<ITourType>) => {
   const existingTourType = await TourType.findOne({ name: payload.name });
@@ -74,8 +75,13 @@ const createTourService = async (payload: Partial<ITour>) => {
 const getToursService = async (query: Record<string, string>) => {
   const filter = query;
   const searchTerm = query.searchTerm || "";
+  const sort = query.sort || "-createdAt";
+  const fields = query.fields.split(",").join(" ") || "";
 
-  delete filter["searchTerm"];
+  for (const field of excludeField) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete filter[field]
+  }
 
   const searchQuery = {
     $or: tourSearchableFields.map((field) => ({
@@ -83,7 +89,7 @@ const getToursService = async (query: Record<string, string>) => {
     })),
   };
 
-  const tours = await Tour.find(searchQuery).find(filter);
+  const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields);
   const allTours = await Tour.countDocuments();
 
   return {
