@@ -1,16 +1,42 @@
 import z from "zod";
 
-export const createTourTypeZodSchema = z.object({
-    name: z 
-        .string({ error: (issue) => issue.code === "invalid_type" ? "Name must be string" : "Name is required", })
-        .min(2, { message: "Name must be at least 2 characters long!" })
-        .max(50, { message: "Name cannot exceed 50 characters." }),
-})
+export const createTourZodSchema = z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    location: z.string().optional(),
+    costFrom: z.number().optional(),
+    startDate: z.string().optional().optional(),
+    endDate: z.string().optional().optional(),
+    tourType: z.string(),
+    included: z.array(z.string()).optional(),
+    excluded: z.array(z.string()).optional(),
+    amenities: z.array(z.string()).optional(),
+    tourPlan: z.array(z.string()).optional(),
+    maxGuest: z.number().optional(),
+    minAge: z.number().optional(),
+    division: z.string(),
+    departureLocation: z.string().optional(),
+    arrivalLocation: z.string().optional()
+});
 
-export const updateTourTypeZodSchema = z.object({
-    name: z 
-        .string({ error: (issue) => issue.code === "invalid_type" ? "Name must be string" : "Name is required", })
-        .min(2, { message: "Name must be at least 2 characters long!" })
-        .max(50, { message: "Name cannot exceed 50 characters." })
-        .optional(),
-})
+export const updateTourZodSchema = z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    location: z.string().optional(),
+    costFrom: z.number().optional(),
+    startDate: z.string().optional().optional(),
+    endDate: z.string().optional().optional(),
+    tourType: z.string().optional(),
+    included: z.array(z.string()).optional(),
+    excluded: z.array(z.string()).optional(),
+    amenities: z.array(z.string()).optional(),
+    tourPlan: z.array(z.string()).optional(),
+    maxGuest: z.number().optional(),
+    minAge: z.number().optional(),
+    departureLocation: z.string().optional(),
+    arrivalLocation: z.string().optional()
+});
+
+export const createTourTypeZodSchema = z.object({
+    name: z.string(),
+});
