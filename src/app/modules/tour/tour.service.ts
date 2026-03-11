@@ -1,9 +1,9 @@
 import httpStatus from "http-status-codes";
+import { excludeField } from "../../constants";
 import AppError from "../../errorHelpers/appError";
+import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
-import { tourSearchableFields } from "./tour.constant";
-import { excludeField } from "../../constants";
 
 const createTourTypeService = async (payload: Partial<ITourType>) => {
   const existingTourType = await TourType.findOne({ name: payload.name });
@@ -76,11 +76,15 @@ const getToursService = async (query: Record<string, string>) => {
   const filter = query;
   const searchTerm = query.searchTerm || "";
   const sort = query.sort || "-createdAt";
-  const fields = query.fields.split(",").join(" ") || "";
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const fields = query.fields?.split(",").join(" ") || "";
 
   for (const field of excludeField) {
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete filter[field]
+    delete filter[field];
   }
 
   const searchQuery = {
@@ -89,7 +93,13 @@ const getToursService = async (query: Record<string, string>) => {
     })),
   };
 
-  const tours = await Tour.find(searchQuery).find(filter).sort(sort).select(fields);
+  const tours = await Tour.find(searchQuery)
+    .find(filter)
+    .sort(sort)
+    .select(fields)
+    .skip(skip)
+    .limit(limit);
+
   const allTours = await Tour.countDocuments();
 
   return {
