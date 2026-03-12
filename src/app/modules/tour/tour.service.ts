@@ -118,22 +118,21 @@ const createTourService = async (payload: Partial<ITour>) => {
 // };
 const getToursService = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Tour.find(), query);
-  const tours = await queryBuilder.filter().search(tourSearchableFields)
-    .modelQuery;
+  const tours = await queryBuilder
+    .filter()
+    .search(tourSearchableFields)
+    .sort()
+    .fields()
+    .paginate()
 
-  // const allTours = await Tour.countDocuments();
-
-  // const totalPage = Math.ceil(allTours / limit);
-  // const meta = {
-  //   page: page,
-  //   limit: limit,
-  //   total: allTours,
-  //   totalPage: totalPage,
-  // }
+  const [data, meta] = await Promise.all([
+    tours.build(),
+    tours.getMeta(),
+  ])
 
   return {
-    data: tours,
-    // meta: meta,
+    data,
+    meta,
   };
 };
 
