@@ -19,6 +19,7 @@ router.post(
   TourControllers.createTourType,
 );
 router.get("/all-tour-types", TourControllers.getAllTourTypes);
+router.get("/tour-type/:slug", TourControllers.getSingleTourType);
 router.patch(
   "/tour-type/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
@@ -40,6 +41,8 @@ router.post(
 );
 
 router.get("/", TourControllers.getTours);
+
+router.get("/:slug", TourControllers.getSingleTour);
 
 router.patch(
   "/:id",

@@ -5,6 +5,8 @@ import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/appError";
 import { IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
+import { QueryBuilder } from "../../utils/queryBuilder";
+import { userSearchableFields } from "./user.constant";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -35,17 +37,25 @@ const createUser = async (payload: Partial<IUser>) => {
   return user;
 };
 
-const getAllUsers = async () => {
-  const users = await User.find({});
+const getAllUsers = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(User.find(), query);
 
-  const totalUsers = await User.countDocuments();
+  const users = await queryBuilder
+    .filter()
+    .search(userSearchableFields)
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    users.build(),
+    users.getMeta(),
+  ])
 
   return {
-    data: users,
-    meta: {
-      total: totalUsers,
-    },
-  };
+    data,
+    meta
+  }
 };
 
 const updateUser = async (
