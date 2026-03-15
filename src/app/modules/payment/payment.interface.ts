@@ -10,7 +10,7 @@ export enum PAYMENT_STATUS {
 }
 
 export interface IPayment {
-    bookingId : Types.ObjectId;
+    booking : Types.ObjectId;
     transactionId : string;
     amount: number;
     paymentGatewayData ?: any;
