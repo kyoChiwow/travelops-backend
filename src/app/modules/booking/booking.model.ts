@@ -5,8 +5,12 @@ const bookingSchema = new Schema<IBooking>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     tour: { type: Schema.Types.ObjectId, ref: "Tour", required: true },
-    payment: { type: Schema.Types.ObjectId, ref: "Payment", required: true },
-    status: { type: String, enum: Object.values(BOOKING_STATUS), defualt: BOOKING_STATUS.PENDING },
+    payment: { type: Schema.Types.ObjectId, ref: "Payment" },
+    status: {
+      type: String,
+      enum: Object.values(BOOKING_STATUS),
+      defualt: BOOKING_STATUS.PENDING,
+    },
     guestCount: { type: Number, required: true },
   },
   { timestamps: true },
