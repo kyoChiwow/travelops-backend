@@ -18,7 +18,8 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getUserBookings = catchAsync( async (req: Request, res: Response) => {
-    const bookings = await BookingServices.getUserBookingService();
+    const decodedToken = req.user as JwtPayload;
+    const bookings = await BookingServices.getUserBookingService(decodedToken.userId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -29,7 +30,8 @@ const getUserBookings = catchAsync( async (req: Request, res: Response) => {
 })
 
 const getSingleBooking = catchAsync( async (req: Request, res: Response) => {
-    const booking = await BookingServices.getBookingByIdService();    
+    const bookingId = req.params.bookingId;
+    const booking = await BookingServices.getBookingByIdService(bookingId);    
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -40,7 +42,8 @@ const getSingleBooking = catchAsync( async (req: Request, res: Response) => {
 })
 
 const getAllBookings = catchAsync( async (req: Request, res: Response) => {
-    const bookings = await BookingServices.getAllBookingService();
+    const query = req.query;
+    const bookings = await BookingServices.getAllBookingService(query as Record<string, string>);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -51,7 +54,9 @@ const getAllBookings = catchAsync( async (req: Request, res: Response) => {
 })
 
 const updateBookingStatus = catchAsync( async (req: Request, res: Response) => {
-    const updated = await BookingServices.updateBookingStatusService();
+    const bookingId = req.params.bookingId;
+    const payload = req.body;
+    const updated = await BookingServices.updateBookingStatusService(bookingId, payload);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

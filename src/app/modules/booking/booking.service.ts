@@ -9,6 +9,7 @@ import { BOOKING_STATUS, IBooking } from "./booking.interface";
 import { Booking } from "./booking.model";
 import { SSLServices } from "../sslCommerz/sslCommerz.service";
 import { ISSLCommerz } from "../sslCommerz/sslcommerz.interface";
+import { QueryBuilder } from "../../utils/queryBuilder";
 
 const getTransactionId = () => {
   return `tran_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -91,8 +92,6 @@ const createBookingService = async (
     }
 
     const sslPayment = await SSLServices.sslPaymentInit(sslPayload);
-
-    console.log(sslPayment);
     // SSLCommerz Codes here
 
     await session.commitTransaction();
@@ -109,20 +108,46 @@ const createBookingService = async (
   // Transaction Rollback Session
 };
 
-const getAllBookingService = async () => {
-  return {};
+const getAllBookingService = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Booking.find(), query)
+
+  const bookings = await queryBuilder
+    .filter()
+    .sort()
+    .fields()
+    .paginate()
+
+  const [data, meta] = await Promise.all([
+    bookings.build(),
+    bookings.getMeta(),
+  ])
+
+  return {
+    data,
+    meta
+  }
 };
 
-const getUserBookingService = async () => {
-  return {};
+const getUserBookingService = async (userId: string) => {
+  const bookings = await Booking.find({ user: userId });
+
+  return bookings;
 };
 
-const getBookingByIdService = async () => {
-  return {};
+const getBookingByIdService = async (bookingId: string) => {
+  const booking = await Booking.findById(bookingId);
+
+  return booking;
 };
 
-const updateBookingStatusService = async () => {
-  return {};
+const updateBookingStatusService = async (bookingId: string, payload: Partial<IBooking>) => {
+  const booking = await Booking.findById(bookingId);
+
+  if (!booking) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking does not exist!");
+  }
+
+  await Booking.findByIdAndUpdate(bookingId, payload);
 };
 
 export const BookingServices = {
