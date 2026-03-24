@@ -3,6 +3,7 @@ import { PaymentControllers } from "./payment.controller";
 
 const router = Router();
 
+router.post("/init-payment/:bookingId", PaymentControllers.initPayment);
 router.post("/success", PaymentControllers.successPayment);
 router.post("/fail", PaymentControllers.failPayment);
 router.post("/cancel", PaymentControllers.cancelPayment);
