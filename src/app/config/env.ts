@@ -33,7 +33,7 @@ interface EnvConfig {
   CLOUDINARY: {
     CLOUDINARY_CLOUD_NAME: string; 
     CLOUDINARY_API_KEY: string;
-    CLOUDINARY_SECRET_KEY: string;
+    CLOUDINARY_API_SECRET: string;
   }
 }
 
@@ -66,7 +66,7 @@ const loadEnvironmentVariables = (): EnvConfig => {
     "SSL_CANCEL_BACKEND_URL",
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
-    "CLOUDINARY_SECRET_KEY",
+    "CLOUDINARY_API_SECRET",
   ];
 
   requiredEnvVars.forEach((key) => {
@@ -105,7 +105,7 @@ const loadEnvironmentVariables = (): EnvConfig => {
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
       CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-      CLOUDINARY_SECRET_KEY: process.env.CLOUDINARY_SECRET_KEY as string
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string
     }
   };
 };
