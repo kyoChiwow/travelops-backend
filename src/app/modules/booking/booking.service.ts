@@ -10,10 +10,7 @@ import { Booking } from "./booking.model";
 import { SSLServices } from "../sslCommerz/sslCommerz.service";
 import { ISSLCommerz } from "../sslCommerz/sslcommerz.interface";
 import { QueryBuilder } from "../../utils/queryBuilder";
-
-const getTransactionId = () => {
-  return `tran_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-};
+import { getTransactionId } from "../../utils/getTransactionId";
 
 const createBookingService = async (
   payload: Partial<IBooking>,

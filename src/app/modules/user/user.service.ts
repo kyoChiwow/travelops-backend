@@ -117,8 +117,26 @@ const updateUser = async (
   return newUpdatedUser;
 };
 
+const getSingleUserService = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+
+  return {
+    data: user
+  }
+}
+
+const getMeService = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+
+  return {
+    data: user
+  }
+}
+
 export const UserServices = {
   createUser,
   getAllUsers,
   updateUser,
+  getSingleUserService,
+  getMeService
 };

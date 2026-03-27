@@ -5,6 +5,7 @@ import { envVars } from "../config/env";
 import AppError from "../errorHelpers/appError";
 import { User } from "../modules/user/user.model";
 import { verifyToken } from "../utils/jwt";
+import { IsActive } from "../modules/user/user.interface";
 
 export const checkAuth =
   (...authRoles: string[]) =>
@@ -30,10 +31,14 @@ export const checkAuth =
       if (!isUserExist) {
         throw new AppError(httpStatus.NOT_FOUND, "User does not exist!");
       }
+      
+      if(!isUserExist.isVerified) {
+        throw new AppError(httpStatus.BAD_REQUEST, "User is not verified!")
+      }
 
       if (
-        isUserExist.isActive === "INACTIVE" ||
-        isUserExist.isActive === "BLOCKED"
+        isUserExist.isActive === IsActive.INACTIVE ||
+        isUserExist.isActive === IsActive.BLOCKED
       ) {
         throw new AppError(
           httpStatus.BAD_REQUEST,

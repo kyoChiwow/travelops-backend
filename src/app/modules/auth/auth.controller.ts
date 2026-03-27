@@ -17,7 +17,7 @@ const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate("local", async (err: any, user: any, info: any) => {
       if (err) {
-        return next(new AppError(httpStatus.UNAUTHORIZED, err));
+        return next(new AppError(401, err));
       }
 
       if (!user) {
@@ -37,7 +37,7 @@ const credentialsLogin = catchAsync(
         data: {
           accessToken: userTokens.accessToken,
           refreshToken: userTokens.refreshToken,
-          user: rest
+          user: rest,
         },
       });
     })(req, res, next); // Manually trigger here because express wont call it again as it is in a callback function
@@ -86,6 +86,27 @@ const logOut = catchAsync(
   },
 );
 
+const changePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+    const decodedToken = req.user;
+
+    await AuthServices.changePassword(
+      oldPassword,
+      newPassword,
+      decodedToken as JwtPayload,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password changed succesfully!",
+      data: null,
+    });
+  },
+);
+
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const newPassword = req.body.newPassword;
@@ -97,6 +118,22 @@ const resetPassword = catchAsync(
       newPassword,
       decodedToken as JwtPayload,
     );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password changed succesfully!",
+      data: null,
+    });
+  },
+);
+
+const setPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload;
+    const { password } = req.body;
+
+    await AuthServices.setPassword(decodedToken.userId, password);
 
     sendResponse(res, {
       success: true,
@@ -134,6 +171,8 @@ export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
   logOut,
-  resetPassword,
+  changePassword,
   googleCallbackController,
+  resetPassword,
+  setPassword,
 };
