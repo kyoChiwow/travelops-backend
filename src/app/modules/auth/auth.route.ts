@@ -10,6 +10,7 @@ const router = Router();
 router.post("/login", AuthControllers.credentialsLogin);
 router.post("/refresh-token", AuthControllers.getNewAccessToken);
 router.post("/logout", AuthControllers.logOut);
+
 router.post(
   "/change-password",
   checkAuth(...Object.values(Role)),
@@ -44,5 +45,7 @@ router.get(
   passport.authenticate("google", { failureRedirect: `${envVars.FRONTEND_URL}/login?error=There is some issues with your account. Please contact with our support team!` }),
   AuthControllers.googleCallbackController,
 );
+
+router.post("/forgot-password", AuthControllers.forgotPassword);
 
 export const AuthRoutes = router;

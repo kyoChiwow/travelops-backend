@@ -122,10 +122,15 @@ const setPassword = async (
   await user.save();
 };
 
+const forgotPasswordService = async () => {
+  return {}
+}
+
 export const AuthServices = {
   // crendentialsLogin,
   getNewAccessToken,
   changePassword,
   resetPassword,
-  setPassword
+  setPassword,
+  forgotPasswordService
 };

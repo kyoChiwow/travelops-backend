@@ -167,6 +167,18 @@ const googleCallbackController = catchAsync(
   },
 );
 
+const forgotPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Link sent to email!",
+      data: {},
+    })
+  },
+);
+
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
@@ -175,4 +187,5 @@ export const AuthControllers = {
   googleCallbackController,
   resetPassword,
   setPassword,
+  forgotPassword,
 };
