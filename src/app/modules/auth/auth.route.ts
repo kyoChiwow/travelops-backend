@@ -4,6 +4,8 @@ import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { AuthControllers } from "./auth.controller";
 import { envVars } from "../../config/env";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { forgotPasswordZodValidation, resetPasswordZodValidation } from "./auth.validation";
 
 const router = Router();
 
@@ -19,6 +21,7 @@ router.post(
 
 router.post(
   "/reset-password",
+  validateRequest(resetPasswordZodValidation),
   checkAuth(...Object.values(Role)),
   AuthControllers.resetPassword,
 );
@@ -46,6 +49,6 @@ router.get(
   AuthControllers.googleCallbackController,
 );
 
-router.post("/forgot-password", AuthControllers.forgotPassword);
+router.post("/forgot-password", validateRequest(forgotPasswordZodValidation), AuthControllers.forgotPassword);
 
 export const AuthRoutes = router;
