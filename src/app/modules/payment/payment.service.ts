@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { uploadBufferFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/appError";
 import { generatePdf, IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
@@ -11,6 +12,7 @@ import { IUser } from "../user/user.interface";
 import { PAYMENT_STATUS } from "./payment.interface";
 import { Payment } from "./payment.model";
 import httpStatus from "http-status-codes";
+
 
 const initPaymentService = async (bookingId: string) => {
   const payment = await Payment.findOne({ booking: bookingId });
@@ -87,6 +89,16 @@ const successPaymentService = async (query: Record<string, string>) => {
       userName: (updatedBooking?.user as unknown as IUser)?.name
     }
     const pdfBuffer = await generatePdf(invoiceData);
+
+    const cloudinaryResult = await uploadBufferFromCloudinary(pdfBuffer, "invoice");
+
+    if (!cloudinaryResult) {
+      throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to upload invoice to cloudinary!");
+    }
+
+    await Payment.findByIdAndUpdate(updatedPayment?._id, {
+      invoiceUrl: cloudinaryResult?.secure_url,
+    }, { runValidators: true, session });
 
     await sendEmail({
       to: (updatedBooking?.user as unknown as IUser)?.email,
@@ -184,9 +196,25 @@ const cancelPaymentService = async (query: Record<string, string>) => {
   }
 };
 
+const getInvoiceDownloadUrlService = async (paymentId: string) => {
+  const payment = await Payment.findById(paymentId)
+  .select("invoiceUrl").orFail(new Error("Payment not found!"))
+
+  if (!payment.invoiceUrl) {
+    return {
+      success: false,
+      message: "Invoice not available yet!",
+      downloadUrl: null
+    }
+  }
+
+  return payment.invoiceUrl;
+}
+
 export const PaymentServices = {
   initPaymentService,
   successPaymentService,
   failPaymentService,
   cancelPaymentService,
+  getInvoiceDownloadUrlService
 };

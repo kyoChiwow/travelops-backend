@@ -57,7 +57,7 @@ export const generatePdf = async (
       const tableTop = 200;
       doc.font("Helvetica-Bold").text("Description", 50, tableTop);
       doc.text("Guests", 350, tableTop);
-      doc.text("Total", 480, tableTop);
+      doc.text("Total (BDT)", 480, tableTop);
 
       doc
         .moveTo(50, tableTop + 15)
@@ -68,7 +68,7 @@ export const generatePdf = async (
       doc.text(invoiceData.guestCount.toString(), 350, tableTop + 25);
       doc
         .font("Helvetica-Bold")
-        .text(`BDT ${invoiceData.totalAmount.toFixed(2)}`, 480, tableTop + 25);
+        .text(`${invoiceData.totalAmount.toFixed(2)}`, 480, tableTop + 25);
 
       // --- Footer ---
       doc.moveDown(10);
