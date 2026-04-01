@@ -71,10 +71,20 @@ const updateUser = async (
    * Superadmin promote - you can't do that
    */
 
+  if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
+    if (userId !== decodedToken.userId) {
+      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
+    }
+  }
+
   const ifUserExists = await User.findById(userId);
 
   if (!ifUserExists) {
     throw new AppError(httpStatus.NOT_FOUND, "User does not exist!");
+  }
+
+  if (decodedToken.role === Role.ADMIN && ifUserExists.role === Role.SUPER_ADMIN) {
+    throw new AppError(httpStatus.FORBIDDEN, "You are not authorized!");
   }
 
   if (payload.role) {
@@ -85,14 +95,6 @@ const updateUser = async (
       );
     }
 
-    if (payload.role === Role.SUPER_ADMIN && decodedToken.role === Role.ADMIN) {
-      throw new AppError(
-        httpStatus.FORBIDDEN,
-        "You are not authorized to change role!",
-      );
-    }
-  }
-
   if (payload.isActive || payload.isDeleted || payload.isVerified) {
     if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
       throw new AppError(
@@ -102,12 +104,6 @@ const updateUser = async (
     }
   }
 
-  if (payload.password) {
-    payload.password = await bcryptjs.hash(
-      payload.password,
-      envVars.BCRYPT_SALT_ROUND,
-    );
-  }
 
   const newUpdatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
@@ -116,6 +112,7 @@ const updateUser = async (
 
   return newUpdatedUser;
 };
+}
 
 const getSingleUserService = async (userId: string) => {
   const user = await User.findById(userId).select("-password");

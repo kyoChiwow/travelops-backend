@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { PaymentServices } from "./payment.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
 
 const initPayment = catchAsync(async (req: Request, res: Response) => {
   const bookingId = req.params.bookingId;
@@ -58,8 +59,9 @@ const cancelPayment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getInvoiceDownloadUrl = catchAsync(async (req: Request, res: Response) => {
+  const decodedToken = req.user as JwtPayload;
   const { paymentId } = req.params;
-  const result = await PaymentServices.getInvoiceDownloadUrlService(paymentId);
+  const result = await PaymentServices.getInvoiceDownloadUrlService(paymentId, decodedToken);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
