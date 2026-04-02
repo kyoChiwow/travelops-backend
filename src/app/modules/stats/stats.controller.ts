@@ -5,12 +5,13 @@ import { Request, Response } from 'express';
 import { StatsServices } from './stats.service';
 
 const getBookingStats = catchAsync( async (req: Request, res: Response) => {
+    const result = await StatsServices.getBookingStatsService();
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Booking stats retrieved successfully!",
-        data: {},
+        data: result,
     })
 } )
 
