@@ -1,0 +1,1 @@
+export const guideSearchableFields = [ "userName", "userEmail", "divisionName" ]

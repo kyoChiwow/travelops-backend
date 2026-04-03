@@ -12,6 +12,8 @@ export interface IGuideApplication {
     nidPhoto: string;
     division: Types.ObjectId;
     status: IGuideApplicationStatus;
+    reviewedBy?: Types.ObjectId;
+    reviewedAt?: Date;
     createdAt?: Date;
     updatedAt: Date;
 }

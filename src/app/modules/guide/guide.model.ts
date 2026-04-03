@@ -11,6 +11,8 @@ const guideApplicationSchema = new Schema<IGuideApplication>(
     },
     nidPhoto: { type: String, required: true },
     division: { type: Schema.Types.ObjectId, ref: "Division", required: true },
+    reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    reviewedAt: { type: Date },
     status: {
       type: String,
       enum: Object.values(IGuideApplicationStatus),
