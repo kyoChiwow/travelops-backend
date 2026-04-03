@@ -10,5 +10,6 @@ router.post("/success", PaymentControllers.successPayment);
 router.post("/fail", PaymentControllers.failPayment);
 router.post("/cancel", PaymentControllers.cancelPayment);
 router.get("/invoice/:paymentId", checkAuth(...Object.values(Role)), PaymentControllers.getInvoiceDownloadUrl);
+router.post("/validate-payment", PaymentControllers.validatePayment);
 
 export const PaymentRoutes = router;

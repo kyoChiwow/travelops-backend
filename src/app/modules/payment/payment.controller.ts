@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Request, Response } from "express";
 import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
@@ -5,6 +6,7 @@ import { PaymentServices } from "./payment.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
+import { SSLServices } from "../sslCommerz/sslCommerz.service";
 
 const initPayment = catchAsync(async (req: Request, res: Response) => {
   const bookingId = req.params.bookingId;
@@ -71,10 +73,22 @@ const getInvoiceDownloadUrl = catchAsync(async (req: Request, res: Response) => 
   })
 })
 
+const validatePayment = catchAsync(async (req: Request, res: Response) => {
+  await SSLServices.validatePayment(req.body);
+  console.log("SSLCommerz IPN URL BODY", req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Payment validated successfully!",
+    data: null,
+  })
+})
+
 export const PaymentControllers = {
   initPayment,
   successPayment,
   failPayment,
   cancelPayment,
-  getInvoiceDownloadUrl
+  getInvoiceDownloadUrl,
+  validatePayment
 };

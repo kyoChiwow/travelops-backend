@@ -29,6 +29,7 @@ interface EnvConfig {
     SSL_SUCCESS_BACKEND_URL: string;
     SSL_FAIL_BACKEND_URL: string;
     SSL_CANCEL_BACKEND_URL: string;
+    SSL_IPN_URL: string;
   };
   CLOUDINARY: {
     CLOUDINARY_CLOUD_NAME: string; 
@@ -87,6 +88,7 @@ const loadEnvironmentVariables = (): EnvConfig => {
     "REDIS_PORT",
     "REDIS_USERNAME",
     "REDIS_PASSWORD",
+    "SSL_IPN_URL",
   ];
 
   requiredEnvVars.forEach((key) => {
@@ -120,7 +122,8 @@ const loadEnvironmentVariables = (): EnvConfig => {
       SSL_CANCEL_FRONTEND_URL: process.env.SSL_CANCEL_FRONTEND_URL as string,
       SSL_SUCCESS_BACKEND_URL: process.env.SSL_SUCCESS_BACKEND_URL as string,
       SSL_FAIL_BACKEND_URL: process.env.SSL_FAIL_BACKEND_URL as string,
-      SSL_CANCEL_BACKEND_URL: process.env.SSL_CANCEL_BACKEND_URL as string
+      SSL_CANCEL_BACKEND_URL: process.env.SSL_CANCEL_BACKEND_URL as string,
+      SSL_IPN_URL: process.env.SSL_IPN_URL as string
     },
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,

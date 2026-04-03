@@ -38,12 +38,13 @@ const getUserStats = catchAsync( async (req: Request, res: Response) => {
 } )
 
 const getPaymentStats = catchAsync( async (req: Request, res: Response) => {
+    const result = await StatsServices.getPaymentStatsService();
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Payment stats retrieved successfully!",
-        data: {},
+        data: result,
     })
 } )
 
