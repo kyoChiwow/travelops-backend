@@ -6,6 +6,7 @@ import { User } from "../user/user.model";
 import { IGuideApplicationStatus } from "./guide.interface";
 import { GuideApplication } from "./guide.model";
 import { Types } from "mongoose";
+import { QueryBuilder } from "../../utils/queryBuilder";
 
 const applyForGuideService = async (
   userId: string,
@@ -81,12 +82,66 @@ const approveRejectApplicationService = async (
   }
 };
 
-const getAllGuideApplicationService = async () => {
-  return {};
+const getAllGuideApplicationService = async (query: Record<string, string>) => {
+  const searchableFields = [ "status" ];
+  const baseQuery = GuideApplication.find()
+    .populate("user","name email picture")
+    .populate("division","name")
+    .populate("reviewedBy","name email");
+  const queryBuilder = new QueryBuilder(baseQuery, query);
+
+  const applications = await queryBuilder
+    .filter()
+    .search(searchableFields)
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    applications.build(),
+    applications.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
 };
+
+const getSingleApplicationService = async (id: string) => {
+  const application = await GuideApplication.findById(id)
+    .populate("user", "name email picture")
+    .populate("division", "name")
+    .populate("reviewedBy", "name email");
+
+  if (!application) {
+    throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+  }
+
+  return application;
+}
+
+const archiveApplicationService = async (id: string) => {
+  const application = await GuideApplication.findById(id);
+
+  if (!application) {
+    throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+  }
+
+  if (application.status === IGuideApplicationStatus.ARCHIVED) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Application already archived!");
+  }
+
+  application.status = IGuideApplicationStatus.ARCHIVED;
+  await application.save();
+
+  return application;
+}
 
 export const GuideServices = {
   applyForGuideService,
   getAllGuideApplicationService,
   approveRejectApplicationService,
+  getSingleApplicationService,
+  archiveApplicationService
 };

@@ -16,11 +16,29 @@ router.post(
   GuideControllers.applyForGuide,
 );
 
+router.get(
+  "/",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  GuideControllers.getAllGuideApplications,
+);
+
 router.post(
   "/approve/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validateRequest(approveGuideZodSchema),
   GuideControllers.approveRejectApplication,
+);
+
+router.get(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  GuideControllers.getSingleApplication,
+);
+
+router.patch(
+  "/archive/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  GuideControllers.archiveApplication,
 );
 
 export const GuideRoutes = router;
