@@ -2,7 +2,10 @@ import httpStatus from "http-status-codes";
 import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/appError";
 import { QueryBuilder } from "../../utils/queryBuilder";
-import { tourSearchableFields } from "./tour.constant";
+import {
+  tourSearchableFields,
+  tourTypeSearchableFields,
+} from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
@@ -18,16 +21,24 @@ const createTourTypeService = async (payload: Partial<ITourType>) => {
   return createTourType;
 };
 
-const getAllTourTypesService = async () => {
-  const tourTypes = await TourType.find({});
+const getAllTourTypesService = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(TourType.find(), query);
 
-  const totalTourTypes = await TourType.countDocuments();
+  const tourTypes = await queryBuilder
+    .search(tourTypeSearchableFields)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    tourTypes.build(),
+    queryBuilder.getMeta(),
+  ]);
 
   return {
-    data: tourTypes,
-    meta: {
-      total: totalTourTypes,
-    },
+    data,
+    meta,
   };
 };
 

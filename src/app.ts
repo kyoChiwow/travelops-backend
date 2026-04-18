@@ -10,6 +10,7 @@ import notFound from "./app/middlewares/notFound";
 import { router } from "./app/routes";
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(
   expressSession({ secret: "secret", resave: false, saveUninitialized: false }),
@@ -18,7 +19,6 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
-app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
