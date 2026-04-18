@@ -13,19 +13,19 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(
-  expressSession({ secret: "secret", resave: false, saveUninitialized: false }),
-);
-app.use(cookieParser());
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
-app.use(
   cors({
     origin: envVars.FRONTEND_URL,
     credentials: true,
   }),
 );
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(cookieParser());
+app.use(
+  expressSession({ secret: "secret", resave: false, saveUninitialized: false }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api/v1", router);
 
