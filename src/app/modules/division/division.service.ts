@@ -1,41 +1,40 @@
 import httpStatus from "http-status-codes";
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/appError";
-import { IDivision } from "./division.interface";
-import { Division } from "./division.model";
 import { QueryBuilder } from "../../utils/queryBuilder";
 import { divisionSearchableFields } from "./division.constant";
-import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
+import { IDivision } from "./division.interface";
+import { Division } from "./division.model";
 
 const createDivisionService = async (payload: IDivision) => {
+  const existingDivision = await Division.findOne({ name: payload.name });
+  if (existingDivision) {
+    throw new Error("A division with this name already exists.");
+  }
 
-    const existingDivision = await Division.findOne({ name: payload.name });
-    if (existingDivision) {
-        throw new Error("A division with this name already exists.");
-    }
+  const division = await Division.create(payload);
 
-    const division = await Division.create(payload);
-
-    return division
+  return division;
 };
 
 const getDivisionsService = async (query: Record<string, string>) => {
-  const queryBuilder = new QueryBuilder(Division.find(), query)
+  const queryBuilder = new QueryBuilder(Division.find(), query);
   const divisions = await queryBuilder
     .filter()
     .search(divisionSearchableFields)
     .sort()
     .fields()
-    .paginate()
+    .paginate();
 
   const [data, meta] = await Promise.all([
     divisions.build(),
     divisions.getMeta(),
-  ])
+  ]);
 
   return {
     data,
-    meta
-  }
+    meta,
+  };
 };
 
 const getSingleDivisionService = async (slug: string) => {
@@ -85,6 +84,9 @@ const deleteDivisonService = async (id: string) => {
   }
 
   await Division.findByIdAndDelete(id);
+  if (isDivisionExist.thumbnail) {
+    await deleteImageFromCloudinary(isDivisionExist.thumbnail);
+  }
   return null;
 };
 
@@ -93,5 +95,5 @@ export const DivisionService = {
   getDivisionsService,
   updateDivisionService,
   deleteDivisonService,
-  getSingleDivisionService
+  getSingleDivisionService,
 };
