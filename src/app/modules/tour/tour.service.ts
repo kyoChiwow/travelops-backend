@@ -154,11 +154,7 @@ const getToursService = async (query: Record<string, string>) => {
 };
 
 const getSingleTourService = async (slug: string) => {
-  const tour = await Tour.findOne({ slug });
-
-  return {
-    data: tour,
-  };
+  return await Tour.findOne({ slug });
 };
 
 const updateTourService = async (id: string, payload: Partial<ITour>) => {
@@ -219,6 +215,11 @@ const deleteTourService = async (id: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Tour does not exist!");
   }
 
+  if (isTourExist.images && isTourExist.images.length > 0) {
+    await Promise.all(
+      isTourExist.images.map((url) => deleteImageFromCloudinary(url)),
+    );
+  }
   const result = await Tour.findByIdAndDelete(id);
 
   return result;
